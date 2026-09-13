@@ -8,6 +8,11 @@
   --font-serif: 'Instrument Serif', serif;
 }
 
+/* Force consistent default arrow cursor across the entire application */
+*, *::before, *::after {
+  cursor: default !important;
+}
+
 /* Subtle scanline / dot grid noise background overlay */
 .noise-bg {
   background-color: #08080A;

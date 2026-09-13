@@ -1,14 +1,17 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { SlotCard } from './components/SlotCard.tsx';
-import { INITIAL_PALETTE, EDITORIAL_PALETTES, FAST_RANDOM_COLORS } from './data/palettes.ts';
+import { INITIAL_PALETTE, FAST_RANDOM_COLORS } from './data/palettes.ts';
 import { Palette, ColorItem } from './types.ts';
 import { soundEngine } from './utils/audio.ts';
-import { RefreshCw } from 'lucide-react';
+import { generateHarmonicPalette } from './utils/harmonicGenerator.ts';
+import { RotateCcw } from 'lucide-react';
 
 export default function App() {
   const [currentPalette, setCurrentPalette] = useState<Palette>(INITIAL_PALETTE);
   const [studyNumber, setStudyNumber] = useState<number>(55);
   const [isSpinning, setIsSpinning] = useState<boolean>(false);
+  const [spinningSlots, setSpinningSlots] = useState<[boolean, boolean, boolean]>([false, false, false]);
+  const [isReset, setIsReset] = useState<boolean>(false);
 
   // Display colors for the 3 slots (can be cycling random colors during spin)
   const [displayedColors, setDisplayedColors] = useState<[ColorItem, ColorItem, ColorItem]>([
@@ -20,16 +23,28 @@ export default function App() {
   const spinIntervals = useRef<(number | NodeJS.Timeout)[]>([]);
   const soundInterval = useRef<number | NodeJS.Timeout | null>(null);
 
+  const handleReset = () => {
+    if (isSpinning) return;
+    setIsReset(true);
+    setDisplayedColors([
+      { name: '?', hex: '#FFFFFF', rgb: '255, 255, 255' },
+      { name: '?', hex: '#FFFFFF', rgb: '255, 255, 255' },
+      { name: '?', hex: '#FFFFFF', rgb: '255, 255, 255' },
+    ]);
+    soundEngine.playClick(240, 'triangle', 0.04);
+  };
+
   const triggerSpin = useCallback(() => {
     if (isSpinning) return;
 
+    setIsReset(false);
     setIsSpinning(true);
+    setSpinningSlots([true, true, true]);
     const newStudyNumber = studyNumber + 1;
     setStudyNumber(newStudyNumber);
 
-    // Pick target palette from curated list (distinct from current if possible)
-    const availablePalettes = EDITORIAL_PALETTES.filter((p) => p.theme !== currentPalette.theme);
-    const targetPalette = availablePalettes[Math.floor(Math.random() * availablePalettes.length)] || EDITORIAL_PALETTES[0];
+    // Generate an infinite, mathematically harmonic palette based on color theory
+    const targetPalette = generateHarmonicPalette();
 
     // Sound effect clicking loop
     soundInterval.current = setInterval(() => {
@@ -40,13 +55,13 @@ export default function App() {
     const stopTimes = [1250, 2500, 3750];
 
     [0, 1, 2].forEach((slotIndex) => {
-      // Fast cycling random colors
+      // Fast cycling random colors - no label shown during spin
       spinIntervals.current[slotIndex] = setInterval(() => {
         const rand = FAST_RANDOM_COLORS[Math.floor(Math.random() * FAST_RANDOM_COLORS.length)];
         setDisplayedColors((prev) => {
           const updated = [...prev] as [ColorItem, ColorItem, ColorItem];
           updated[slotIndex] = {
-            name: 'CYCLING...',
+            name: '',
             hex: rand.hex,
             rgb: rand.rgb,
           };
@@ -64,6 +79,13 @@ export default function App() {
         setDisplayedColors((prev) => {
           const updated = [...prev] as [ColorItem, ColorItem, ColorItem];
           updated[slotIndex] = resolvedColor;
+          return updated;
+        });
+
+        // Mark this individual slot as finished so its HEX and color name show up
+        setSpinningSlots((prev) => {
+          const updated = [...prev] as [boolean, boolean, boolean];
+          updated[slotIndex] = false;
           return updated;
         });
 
@@ -144,19 +166,22 @@ export default function App() {
               index={0}
               roleLabel="DOMINANT"
               color={displayedColors[0]}
-              isSpinning={isSpinning}
+              isSpinning={spinningSlots[0]}
+              isReset={isReset}
             />
             <SlotCard
               index={1}
               roleLabel="SECONDARY"
               color={displayedColors[1]}
-              isSpinning={isSpinning}
+              isSpinning={spinningSlots[1]}
+              isReset={isReset}
             />
             <SlotCard
               index={2}
               roleLabel="ACCENT / TENSION"
               color={displayedColors[2]}
-              isSpinning={isSpinning}
+              isSpinning={spinningSlots[2]}
+              isReset={isReset}
             />
           </div>
 
@@ -167,11 +192,10 @@ export default function App() {
               id="spin-button"
               onClick={triggerSpin}
               disabled={isSpinning}
-              className={`spin-btn w-full sm:w-auto px-12 sm:px-16 py-3.5 sm:py-4 bg-white hover:bg-zinc-100 text-black font-['Syne',sans-serif] font-black text-sm sm:text-base tracking-widest uppercase transition-all duration-150 flex items-center justify-center gap-3 select-none cursor-pointer shadow-[4px_4px_0px_#27272a] hover:shadow-[2px_2px_0px_#27272a] ${
-                isSpinning ? 'opacity-80 cursor-wait' : ''
+              className={`spin-btn w-full sm:w-auto px-12 sm:px-16 py-3.5 sm:py-4 bg-white hover:bg-zinc-100 text-black font-['Syne',sans-serif] font-black text-sm sm:text-base tracking-widest uppercase transition-all duration-150 flex items-center justify-center gap-3 select-none shadow-[4px_4px_0px_#27272a] hover:shadow-[2px_2px_0px_#27272a] ${
+                isSpinning ? 'opacity-80' : ''
               }`}
             >
-              {isSpinning && <RefreshCw className="w-4 h-4 animate-spin text-black" />}
               <span id="spin-btn-label">
                 {isSpinning ? 'SPINNING...' : 'SPIN'}
               </span>
@@ -179,6 +203,18 @@ export default function App() {
           </div>
         </div>
       </main>
+
+      {/* Floating Bottom-Right Reset Button */}
+      <button
+        id="reset-button"
+        onClick={handleReset}
+        disabled={isSpinning}
+        title="Reset slots to standby state (?)"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-zinc-900/90 hover:bg-zinc-800 active:scale-95 text-zinc-300 hover:text-white border border-zinc-700 hover:border-zinc-500 font-mono text-xs tracking-wider uppercase transition-all duration-150 backdrop-blur-xs shadow-xl disabled:opacity-30"
+      >
+        <RotateCcw className="w-3.5 h-3.5 text-zinc-400 group-hover:text-white" />
+        <span>RESET</span>
+      </button>
     </div>
   );
 }

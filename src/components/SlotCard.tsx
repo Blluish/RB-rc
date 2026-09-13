@@ -9,6 +9,7 @@ interface SlotCardProps {
   roleLabel: string;
   color: ColorItem;
   isSpinning: boolean;
+  isReset?: boolean;
 }
 
 export const SlotCard: React.FC<SlotCardProps> = ({
@@ -16,12 +17,13 @@ export const SlotCard: React.FC<SlotCardProps> = ({
   roleLabel,
   color,
   isSpinning,
+  isReset = false,
 }) => {
   const [copied, setCopied] = useState(false);
   const textColor = getContrastColor(color.hex);
 
   const handleCardClick = () => {
-    if (isSpinning) return;
+    if (isSpinning || isReset) return;
     navigator.clipboard.writeText(color.hex);
     setCopied(true);
     soundEngine.playClick(600, 'sine', 0.04);
@@ -44,27 +46,40 @@ export const SlotCard: React.FC<SlotCardProps> = ({
       <div
         id={`slot-card-${index}`}
         onClick={handleCardClick}
-        className="relative h-24 sm:h-80 md:h-96 w-full overflow-hidden transition-all duration-300 select-none group border border-zinc-800 hover:border-zinc-500 cursor-pointer"
-        title="Click to copy HEX code"
+        className="relative h-24 sm:h-80 md:h-96 w-full overflow-hidden transition-all duration-300 select-none group border border-zinc-800 hover:border-zinc-500"
+        title={isReset ? 'Ready to spin' : 'Click to copy HEX code'}
       >
-        {/* Dynamic Color Fill Canvas */}
+        {/* Dynamic Color Fill Canvas (White when isReset) */}
         <div
-          className="absolute inset-0 flex flex-row sm:flex-col items-center justify-between sm:justify-center px-5 sm:p-5 transition-colors duration-200"
-          style={{ backgroundColor: color.hex }}
+          className="absolute inset-0 flex flex-row sm:flex-col items-center justify-center px-5 sm:p-5 transition-colors duration-200"
+          style={{ backgroundColor: isReset ? '#FFFFFF' : color.hex }}
         >
-          {/* Chromatic Identity: HEX & Color Name */}
-          <div
-            className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-mono font-black tracking-tight transition-transform duration-150 group-hover:scale-105"
-            style={{ color: textColor }}
-          >
-            {color.hex}
-          </div>
-          <div
-            className="text-xs sm:text-xs md:text-sm font-['Space_Grotesk',sans-serif] font-bold sm:mt-2 uppercase tracking-wider sm:tracking-widest opacity-90 text-right sm:text-center px-1 max-w-[50%] sm:max-w-none truncate sm:whitespace-normal"
-            style={{ color: textColor }}
-          >
-            {color.name}
-          </div>
+          {/* When reset: show white box with centered question mark '?' */}
+          {isReset ? (
+            <div className="w-full flex items-center justify-center animate-in fade-in duration-200">
+              <span className="font-mono font-black text-3xl sm:text-5xl md:text-6xl text-zinc-400 select-none">
+                ?
+              </span>
+            </div>
+          ) : (
+            /* Chromatic Identity: HEX & Color Name (Only shown when slot has locked in) */
+            !isSpinning && (
+              <div className="w-full flex flex-row sm:flex-col items-center justify-between sm:justify-center animate-in fade-in zoom-in-95 duration-200">
+                <div
+                  className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-mono font-black tracking-tight transition-transform duration-150 group-hover:scale-105"
+                  style={{ color: textColor }}
+                >
+                  {color.hex}
+                </div>
+                <div
+                  className="text-xs sm:text-xs md:text-sm font-['Space_Grotesk',sans-serif] font-bold sm:mt-2 uppercase tracking-wider sm:tracking-widest opacity-90 text-right sm:text-center px-1 max-w-[50%] sm:max-w-none truncate sm:whitespace-normal"
+                  style={{ color: textColor }}
+                >
+                  {color.name}
+                </div>
+              </div>
+            )
+          )}
 
           {/* Minimalist Copied Toast / Overlay */}
           {copied && (
