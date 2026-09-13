@@ -36,8 +36,8 @@ export default function App() {
       soundEngine.playClick(280 + Math.random() * 260, 'triangle', 0.025);
     }, 55);
 
-    // Staggered stop delays: Slot 0 stops at 1000ms, Slot 1 at 1650ms, Slot 2 at 2300ms
-    const stopTimes = [1000, 1650, 2300];
+    // Staggered stop delays: Slot 0 at 1.25s, Slot 1 at 2.5s, Slot 2 at 3.75s (1.25s intervals)
+    const stopTimes = [1250, 2500, 3750];
 
     [0, 1, 2].forEach((slotIndex) => {
       // Fast cycling random colors
