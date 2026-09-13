@@ -1,0 +1,6 @@
+{
+  "name": "RUBBRIEF Color Slot",
+  "description": "Editorial color slot machine and creative direction randomizer with tactile reel physics, curated palettes, lockable slots, and reels card export.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
