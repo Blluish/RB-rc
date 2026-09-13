@@ -31,9 +31,12 @@ export const SlotCard: React.FC<SlotCardProps> = ({
   return (
     <div className="flex flex-col h-full">
       {/* Slot Header Label */}
-      <div className="flex items-center justify-end text-[10px] sm:text-xs font-mono text-zinc-400 border-b border-zinc-800 pb-1 mb-2 px-0.5">
+      <div className="flex items-center justify-between sm:justify-end text-[10px] sm:text-xs font-mono text-zinc-400 border-b border-zinc-800 pb-1 mb-1.5 sm:mb-2 px-0.5">
         <span className="text-zinc-500 tracking-wider uppercase text-[9px] sm:text-[10px]">
           {roleLabel}
+        </span>
+        <span className="text-[9px] font-mono text-zinc-600 sm:hidden">
+          REEL 0{index + 1}
         </span>
       </div>
 
@@ -41,28 +44,26 @@ export const SlotCard: React.FC<SlotCardProps> = ({
       <div
         id={`slot-card-${index}`}
         onClick={handleCardClick}
-        className="relative h-64 sm:h-80 md:h-96 w-full overflow-hidden transition-all duration-300 select-none group border border-zinc-800 hover:border-zinc-500 cursor-pointer"
+        className="relative h-24 sm:h-80 md:h-96 w-full overflow-hidden transition-all duration-300 select-none group border border-zinc-800 hover:border-zinc-500 cursor-pointer"
         title="Click to copy HEX code"
       >
         {/* Dynamic Color Fill Canvas */}
         <div
-          className="absolute inset-0 flex flex-col items-center justify-center p-3 sm:p-5 transition-colors duration-200"
+          className="absolute inset-0 flex flex-row sm:flex-col items-center justify-between sm:justify-center px-5 sm:p-5 transition-colors duration-200"
           style={{ backgroundColor: color.hex }}
         >
-          {/* Center Chromatic Identity: HEX & Color Name */}
-          <div className="relative z-20 flex flex-col items-center justify-center text-center my-auto py-4">
-            <div
-              className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-mono font-black tracking-tight transition-transform duration-150 group-hover:scale-105"
-              style={{ color: textColor }}
-            >
-              {color.hex}
-            </div>
-            <div
-              className="text-[11px] sm:text-xs md:text-sm font-['Space_Grotesk',sans-serif] font-bold mt-2 uppercase tracking-widest opacity-90 text-center px-1"
-              style={{ color: textColor }}
-            >
-              {color.name}
-            </div>
+          {/* Chromatic Identity: HEX & Color Name */}
+          <div
+            className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-mono font-black tracking-tight transition-transform duration-150 group-hover:scale-105"
+            style={{ color: textColor }}
+          >
+            {color.hex}
+          </div>
+          <div
+            className="text-xs sm:text-xs md:text-sm font-['Space_Grotesk',sans-serif] font-bold sm:mt-2 uppercase tracking-wider sm:tracking-widest opacity-90 text-right sm:text-center px-1 max-w-[50%] sm:max-w-none truncate sm:whitespace-normal"
+            style={{ color: textColor }}
+          >
+            {color.name}
           </div>
 
           {/* Minimalist Copied Toast / Overlay */}

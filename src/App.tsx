@@ -131,15 +131,15 @@ export default function App() {
           </div>
 
           {/* Mechanical Center Guide Markers (Left & Right Tick Notches) */}
-          <div className="absolute top-1/2 left-0 -translate-y-1/2 pointer-events-none z-30">
+          <div className="hidden sm:block absolute top-1/2 left-0 -translate-y-1/2 pointer-events-none z-30">
             <div className="w-1.5 h-7 bg-white shadow-sm border border-black" />
           </div>
-          <div className="absolute top-1/2 right-0 -translate-y-1/2 pointer-events-none z-30">
+          <div className="hidden sm:block absolute top-1/2 right-0 -translate-y-1/2 pointer-events-none z-30">
             <div className="w-1.5 h-7 bg-white shadow-sm border border-black" />
           </div>
 
-          {/* 3 Reel Columns */}
-          <div className="grid grid-cols-3 gap-2 sm:gap-4 relative">
+          {/* 3 Reel Columns on desktop, Horizontal Stack on mobile */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4 relative">
             <SlotCard
               index={0}
               roleLabel="DOMINANT"
